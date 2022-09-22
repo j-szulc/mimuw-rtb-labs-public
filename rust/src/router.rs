@@ -43,7 +43,7 @@ impl RequestWrapper {
 
 #[post("/user_tags", data = "<body>")]
 async fn add_user_tags(req: RequestWrapper, body: String) -> Status {
-    let host = format!("http://mimuw-rtb-labs-pds-5-case-one-{}:8001", Uniform::from(1..=8).sample(&mut rand::thread_rng()));
+    let host = format!("http://mimuw-rtb-labs-public-case-one-{}:8001", Uniform::from(1..=8).sample(&mut rand::thread_rng()));
     req.post(body, &host).await.unwrap();
     Status::NoContent
 }
