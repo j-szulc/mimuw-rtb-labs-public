@@ -31,7 +31,7 @@ impl RequestWrapper {
     async fn post(&self, body: String, host: &str) -> Result<String, reqwest::Error> {
         let client = reqwest::Client::new();
         let full_uri = host.to_owned() + &self.uri;
-        dbg!(&full_uri);
+        // dbg!(&full_uri);
         let res = client.post(full_uri)
             .body(body)
             .send()
