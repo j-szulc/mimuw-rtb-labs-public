@@ -1,0 +1,79 @@
+version: "2"
+services:
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - 8080:8080
+    depends_on:
+      - zookeeper
+      - kafka
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+  zookeeper:
+    image: 'bitnami/zookeeper:latest'
+    ports:
+      - '2181:2181'
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+  kafka:
+    image: 'bitnami/kafka:latest'
+    ports:
+      - '9092:9092'
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    depends_on:
+      - zookeeper
+  case-one:
+    deploy:
+      replicas: 8
+    build:
+      context: "rust"
+      target: "runner-case-one"
+    environment:
+      - ROCKET_ADDRESS=0.0.0.0
+      - ROCKET_PORT=8001
+    depends_on:
+      - zookeeper
+      - kafka
+  case-two-0:
+    build:
+      context: "rust"
+      target: "runner-case-two"
+    environment:
+      - ROCKET_ADDRESS=0.0.0.0
+      - ROCKET_PORT=8002
+      - INPUT_TOPIC=user-tags-0
+    depends_on:
+      - zookeeper
+      - kafka
+  case-two-1:
+    build:
+      context: "rust"
+      target: "runner-case-two"
+    environment:
+      - ROCKET_ADDRESS=0.0.0.0
+      - ROCKET_PORT=8002
+      - INPUT_TOPIC=user-tags-1
+    depends_on:
+      - zookeeper
+      - kafka
+  router:
+#    deploy:
+#      replicas: 8
+    ports:
+      - 8000:8000
+    build:
+      context: "rust"
+      target: "runner-router"
+    environment:
+      - ROCKET_ADDRESS=0.0.0.0
+      - ROCKET_PORT=8000
+    depends_on:
+      - zookeeper
+      - kafka
