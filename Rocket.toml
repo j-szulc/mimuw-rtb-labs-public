@@ -1,2 +1,3 @@
 [default.limits]
 json = "1MiB"
+string = "1MiB"
